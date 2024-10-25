@@ -1,0 +1,137 @@
+Vagrant.configure("2") do |config|
+    config.vm.define "ubuntu-web1" do |machine|
+        machine.vm.box = "ubuntu/focal64"
+        machine.vm.network "private_network", type: "static", ip: "192.168.32.121"
+        config.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.disk :disk, size: "3GB", name: "sdb"
+        machine.vm.disk :disk, size: "3GB", name: "sdc"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-web1
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-raid.sh
+            bash /vagrant/setup-glusterfs.sh
+            bash /vagrant/setup-web.sh
+            bash /vagrant/setup-monitoring.sh
+            sudo reboot
+        SHELL
+    end
+
+    config.vm.define "ubuntu-web2" do |machine|
+        machine.vm.box = "ubuntu/focal64"
+        machine.vm.network "private_network", type: "static", ip: "192.168.32.122"
+        config.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.disk :disk, size: "3GB", name: "sdb"
+        machine.vm.disk :disk, size: "3GB", name: "sdc"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-web2
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-raid.sh
+            bash /vagrant/setup-glusterfs.sh
+            bash /vagrant/setup-web.sh
+            bash /vagrant/setup-monitoring.sh
+            sudo reboot
+        SHELL
+    end
+
+    config.vm.define "ubuntu-sql1" do |machine|
+        machine.vm.box = "ubuntu/focal64"
+        machine.vm.network "private-network", type: "static", ip: "192.168.32.111"
+        machine.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.disk :disk, size: "3GB", name: "sdb"
+        machine.vm.disk :disk, size: "3GB", name: "sdc"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+            vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-sql1
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-raid.sh
+            bash /vagrant/setup-glusterfs.sh
+            bash /vagrant/setup-monitoring.sh
+            sudo reboot
+        SHELL
+    end
+
+    config.vm.define "ubuntu-sql2" do |machine|
+        machine.vm.box = "ubuntu-focal64"
+        machine.vm.network "private-network", type: "static", ip: "192.168.32.112"
+        machine.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.disk :disk, size: "3GB", name: "sdb"
+        machine.vm.disk :disk, size: "3GB", name: "sdc"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+            vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-sql2
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-raid.sh
+            bash /vagrant/setup-glusterfs.sh
+            bash /vagrant/setup-monitoring.sh
+            sudo reboot
+        SHELL
+    end
+
+    config.vm.define "ubuntu-haproxy1" do |machine|
+        machine.vm.box = "ubuntu/focal64"
+        machine.vm.network "private-network", type: "static", ip: "172.20.32.200"
+        machine.vm.network "private-network", type: "static", ip: "192.168.32.100"
+        machine.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+            vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-haproxy1
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-haproxy.sh
+            sudo reboot
+        SHELL
+    end
+
+    config.vm.define "ubuntu-haproxy2" do |machine|
+        machine.vm.box = "ubuntu/focal64"
+        machine.vm.network "private-network", type: "static", ip: "172.20.32.201"
+        machine.vm.network "private-network", type: "static", ip: "192.168.32.101"
+        machine.vm.synced_folder "shared/", "/vagrant"
+
+        machine.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--groups", "/TPSC"]
+            vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        end
+
+        machine.vm.provision "shell", inline: <<-SHELL
+            sudo hostnamectl set-hostname ubuntu-haproxy2
+            chmod +x /vagrant/*.sh
+            bash /vagrant/initial-setup.sh
+            bash /vagrant/setup-haproxy.sh
+            sudo reboot
+        SHELL
+    end 
+end
