@@ -1,0 +1,32 @@
+services:
+  cacti:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cacti
+    restart: always
+    ports:
+      - 81:80
+    volumes:
+      - /cluster/www/cacti/config.php:/var/www/html/cacti/include/config.php
+
+  ganglia:
+    image: particlekit/ganglia:latest
+    container_name: ganglia
+    restart: always
+    ports:
+      - 82:80
+      - 2345:2345
+      - 8648:8648
+    volumes:
+      - /cluster/www/ganglia/gmetad:/etc/ganglia
+      - /cluster/www/ganglia/apache:/etc/apache2/sites-enabled
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
